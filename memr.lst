@@ -1,0 +1,1548 @@
+              	; --------------------------------------
+              	; zasm: assemble "memr.asm"
+              	; opts: --asm8080
+              	; date: 2020-04-09 16:36:26
+              	; --------------------------------------
+
+
+              	;
+              	; MEMR Rasmussen memory test for CP/M2 on Altair.
+              	; Version 2.2
+              	;
+              	; Copyright (C) 1980 Lifeboat Associates
+              	;
+              	
+0000:         	MONITOR	EQU	0000H
+0001:         	WBOOT	EQU	0001H
+0100:         	TPA	EQU	0100H
+              	
+0010:         	RST2	EQU	0010H
+0028:         	RST5	EQU	0028H
+0038:         	RST7	EQU	0038H
+              	
+0082:         	ARGS	EQU	0082H
+              	
+00F0:         	STACK	EQU	00f0H
+00F1:         	ADDRBUF	EQU	00f1H
+00F3:         	TADDR	EQU	00f3H
+00F9:         	LINECNT	EQU	00f9H
+00FA:         	MEMTOP	EQU	00faH
+00FC:         	SADDR	EQU	00fcH
+00FE:         	EADDR	EQU	00feH
+              	
+0003:         	CTRLC	EQU	03H		; Control-C
+000D:         	CR	EQU	0DH		; Carriage return
+000A:         	LF	EQU	0AH		; Line feed
+001B:         	ESC	EQU	1BH		; Escape
+              	
+0012:         	LINES	EQU	012H
+              	
+              	
+0100:         		ORG	TPA		;START of TPA
+              	
+              	
+              	; JUMP TABLE - Jumps MUST remain here in same order.
+0100: C36901  	JSTART	JMP	START
+0103: C3D009  	JCINIT	JMP	CINIT
+0106: C30000  	JMON	JMP	MONITOR
+0109: C3C709  	JCONST	JMP	CONST
+010C: C3CA09  	JCONIN	JMP	CONIN
+010F: C3CD09  	JCONOUT	JMP	CONOUT
+              	
+0112: DD09    		DW	TFIRST		; First byte tested
+              	
+0114:         	MBANNER:
+0114: 0D0A0D0A		DB	CR,LF,CR,LF
+0118: 4D454D52		DB	'MEMR Rasmussen Memory Test - Version 2.2',CR,LF
+011C: 20526173	
+0120: 6D757373	
+0124: 656E204D	
+0128: 656D6F72	
+012C: 79205465	
+0130: 7374202D	
+0134: 20566572	
+0138: 73696F6E	
+013C: 20322E32	
+0140: 0D0A    	
+0142: 436F7079		DB	'Copyright (C) 1980 Lifeboat Associates',0
+0146: 72696768	
+014A: 74202843	
+014E: 29203139	
+0152: 3830204C	
+0156: 69666562	
+015A: 6F617420	
+015E: 4173736F	
+0162: 63696174	
+0166: 657300  	
+              	
+0169:         	START:
+0169: 31F000  		LXI	SP,STACK
+016C: CD0301  		CALL	JCINIT
+016F: 3E12    		MVI	A,LINES
+0171: 32F900  		STA	LINECNT
+0174: CDC601  		CALL	CONFIG
+0177: CDFD01  		CALL	PSTART
+017A: CD2C02  		CALL	PEND
+017D: CD3706  		CALL	PCRLF
+0180: 114407  		LXI	D,MCONT
+0183: CD0406  		CALL	PSTRING
+0186: CD7A09  		CALL	GETCHAR	
+              	
+0189:         	TSTLOOP:
+0189: 31F000  		LXI	SP,STACK
+018C: CD3706  		CALL	PCRLF
+018F: 21A401  		LXI	H,PDONE
+0192: E5      		PUSH	H
+0193: 3A8200  		LDA	ARGS
+0196: FE4D    		CPI	'M'
+0198: CAA504  		JZ	M1ONLY
+019B: FE52    		CPI	'R'
+019D: CA4104  		JZ	RNTEST
+01A0: E1      		POP	H
+01A1: CDAD01  		CALL	RUNALL
+01A4:         	PDONE:
+01A4: 113F09  		LXI	D,MDONE
+01A7: CD0406  		CALL	PSTRING
+01AA: C38901  		JMP	TSTLOOP
+              	
+01AD:         	RUNALL:
+01AD: CDCF02  		CALL	FCTEST		;Fast compliment test
+01B0: CD2203  		CALL	BSTEST		;Bits stuck high/low test
+01B3: CD0603  		CALL	ABTEST		;Adjacent bits stuck test
+01B6: CD4103  		CALL	CBTEST		;Checkerboard test
+01B9: CD8703  		CALL	WBTEST		;Walking bit left/right test
+01BC: CDF803  		CALL	ALTEST		;Address line test
+01BF: CD4104  		CALL	RNTEST		;Random number test
+01C2: CD9904  		CALL	M1TEST		;M1 cycle test
+01C5: C9      		RET
+01C6:         	CONFIG:
+01C6: 111401  		LXI	D,MBANNER
+01C9: CD0406  		CALL	PSTRING
+01CC: 116306  		LXI	D,MBLA
+01CF: CD0406  		CALL	PSTRING
+01D2: 2A0100  		LHLD	WBOOT
+01D5: 2E00    		MVI	L,000h
+01D7: CD1006  		CALL	PADDR
+01DA: 3A8200  		LDA	ARGS
+01DD: FE54    		CPI	'T'
+01DF: C2F101  		JNZ	CONFIG0
+01E2: 117806  		LXI	D,MTOP
+01E5: CD0406  		CALL	PSTRING
+01E8: CD5006  		CALL	FINDTOP
+01EB: 22FA00  		SHLD	MEMTOP
+01EE: CD1006  		CALL	PADDR
+01F1:         	CONFIG0:
+01F1: 118B06  		LXI	D,MKEYS
+01F4: CD0406  		CALL	PSTRING
+01F7: 11E306  		LXI	D,MDEF
+01FA: C30406  		JMP	PSTRING
+01FD:         	PSTART:
+01FD: 117B07  		LXI	D,MSTADR	;Starting address
+0200: CD0406  		CALL	PSTRING
+0203:         	GSTART:
+0203: CDC505  		CALL	GETADDR
+0206: D21102  		JNC	GSTART0
+0209: 21DD09  		LXI	H,TFIRST
+020C: E5      		PUSH	H
+020D: CD1006  		CALL	PADDR
+0210: E1      		POP	H
+0211:         	GSTART0:
+0211: EB      		XCHG
+0212: 21DD09  		LXI	H,TFIRST
+0215: CD4706  		CALL	SUB16
+0218: EB      		XCHG
+0219: 22FC00  		SHLD	SADDR
+021C: D0      		RNC
+021D: 119F07  		LXI	D,MREST		;Re-enter start address
+0220: CD0406  		CALL	PSTRING
+0223: 21DD09  		LXI	H,TFIRST
+0226: CD1006  		CALL	PADDR
+0229: C30302  		JMP	GSTART
+022C:         	PEND:
+022C: 11CE07  		LXI	D,MENDADR
+022F: CD0406  		CALL	PSTRING
+0232:         	GEND:
+0232: CDC505  		CALL	GETADDR
+0235: D24402  		JNC	GEND0
+0238: 2A0100  		LHLD	WBOOT
+023B: 11FCFF  		LXI	D,0FFFCH
+023E: 19      		DAD	D
+023F: E5      		PUSH	H
+0240: CD1006  		CALL	PADDR
+0243: E1      		POP	H
+              	
+0244:         	GEND0:
+0244: EB      		XCHG
+0245: 2AFC00  		LHLD	SADDR
+0248: 23      		INX	H
+0249: CD4706  		CALL	SUB16
+024C: D25802  		JNC	GEND1
+024F: 11F207  		LXI	D,MREND
+0252: CD0406  		CALL	PSTRING
+0255: C33202  		JMP	GEND
+              	
+0258:         	GEND1:
+0258: EB      		XCHG
+0259: 22FE00  		SHLD	EADDR
+025C: 22F500  		SHLD	00F5H		;025c	22 f5 00 	" . . 
+025F: C9      		RET
+              	
+0260:         	PBADMEM:
+0260: C5      		PUSH	B
+0261: D5      		PUSH	D
+0262: E5      		PUSH	H
+0263: F5      		PUSH	PSW
+0264: CD3706  		CALL	PCRLF
+0267: 115609  		LXI	D,MLOC
+026A: 3AF900  		LDA	LINECNT
+026D: FE12    		CPI	LINES
+026F: CC0406  		CZ	PSTRING
+0272: CD1006  		CALL	PADDR
+0275: 50      		MOV	D,B
+0276: CD1E06  		CALL	PBYTED
+0279: 78      		MOV	A,B
+027A: CDD505  		CALL	PBINARY
+027D: F1      		POP	PSW
+027E: F5      		PUSH	PSW
+027F: 57      		MOV	D,A
+0280: CD1E06  		CALL	PBYTED
+0283: F1      		POP	PSW
+0284: CDD505  		CALL	PBINARY
+0287: 3AF900  		LDA	LINECNT
+028A: 3D      		DCR	A
+028B: 32F900  		STA	LINECNT
+028E: C29F02  		JNZ	PBM0
+0291: 114407  		LXI	D,MCONT
+0294: CD0406  		CALL	PSTRING
+0297: CDC505  		CALL	GETADDR
+029A: 3E12    		MVI	A,LINES
+029C: 32F900  		STA	LINECNT
+              	
+029F:         	PBM0:
+029F: E1      		POP	H
+02A0: D1      		POP	D
+02A1: C1      		POP	B
+02A2: C9      		RET
+              	
+02A3:         	SETSE:
+              		; Set HL=Start Address DE=End Address
+              		; Check for console character
+02A3: CD9F09  		CALL	GETC
+02A6: 2AFE00  		LHLD	EADDR
+02A9: EB      		XCHG	
+02AA: 2AFC00  		LHLD	SADDR
+02AD: C9      		RET
+              	
+02AE:         	WRMEM:
+              		; Write B to memory from start address in HL
+              		; to ending address in DE
+02AE: CDA302  		CALL	SETSE
+              	
+02B1:         	WRMEM0:
+              		; Write memory loop
+02B1: 70      		MOV	M,B
+02B2: 23      		INX	H
+02B3: CD4706  		CALL	SUB16
+02B6: D2B102  		JNC	WRMEM0
+02B9: C9      		RET
+              	
+02BA:         	RDMEM:
+              		; Read memory from SADDR to EADDR
+02BA: 2AFC00  		LHLD	SADDR
+              	
+02BD:         	RDMEMHL:
+              		; Read memory from HL to EADDR and compare
+              		; the value to B
+02BD: EB      		XCHG
+02BE: 2AFE00  		LHLD	EADDR
+02C1: EB      		XCHG
+              	
+02C2:         	RDMEM0:
+              		; Read memory loop
+02C2: 7E      		MOV	A,M
+02C3: B8      		CMP	B
+02C4: C46002  		CNZ	PBADMEM	
+02C7: 23      		INX	H
+02C8: CD4706  		CALL	SUB16
+02CB: D2C202  		JNC	RDMEM0
+02CE: C9      		RET
+              	
+02CF:         	FCTEST:
+              		; FAST COMPLEMENT TEST:
+              		; This is a test of ALL MEMORY starting at 0 to top of RAM.
+              		; It loads each byte and tries to store the complement.
+              		; Tests if properly complemented and restores original byte.
+              		; This is the only test that can test where MEMR runs
+              		; in the TPA (from 0 to approx 800H) and the BIOS area
+              		; which contains the console drivers.
+              	
+02CF: 3A8200  		LDA	ARGS
+02D2: FE54    		CPI	'T'
+02D4: C0      		RNZ
+02D5: 113F08  		LXI	D,MFCTEST
+02D8: CD0406  		CALL	PSTRING
+02DB: 2AFA00  		LHLD	MEMTOP
+02DE: CD1006  		CALL	PADDR
+02E1: 210000  		LXI	H,0000H
+02E4: 11F002  		LXI	D,FCTEST0-1
+02E7: CDF102  		CALL	FCTEST0
+02EA: 2AFA00  		LHLD	MEMTOP
+02ED: EB      		XCHG
+02EE: 21F902  		LXI	H,FCTEST1
+              	
+02F1:         	FCTEST0:
+02F1: 7E      		MOV	A,M
+02F2: 2F      		CMA
+02F3: 77      		MOV	M,A
+02F4: 47      		MOV	B,A
+02F5: 4E      		MOV	C,M
+02F6: 78      		MOV	A,B
+02F7: 2F      		CMA
+02F8: 77      		MOV	M,A
+              	
+02F9:         	FCTEST1:
+02F9: 79      		MOV	A,C
+02FA: B8      		CMP	B
+02FB: C46002  		CNZ	PBADMEM
+02FE: 23      		INX	H
+02FF: CD4706  		CALL	SUB16
+0302: D2F102  		JNC	FCTEST0
+0305: C9      		RET
+              	
+0306:         	ABTEST:
+              		; ADJACENT BIT SHORTED TEST:
+              		; Sets a single bit in all bytes high.
+              		; Then checks if a bit is shorted to the
+              		; ones on each side.
+              		; The test repeats 8 times, rotating
+              		; the test bit from LSB to MSB.
+              	
+0306: 117F08  		LXI	D,MABTEST
+0309: CD0406  		CALL	PSTRING
+030C: 3E01    		MVI	A,01H
+              	
+030E:         	ABT0:
+030E: 47      		MOV	B,A
+030F: CD1603  		CALL	ABT1
+0312: D20E03  		JNC	ABT0
+0315: C9      		RET
+              	
+0316:         	ABT1:
+0316: F5      		PUSH	PSW
+0317: CDAE02  		CALL	WRMEM
+031A: F1      		POP	PSW
+031B: F5      		PUSH	PSW
+031C: CDBA02  		CALL	RDMEM
+031F: F1      		POP	PSW
+0320: 07      		RLC
+0321: C9      		RET
+              	
+0322:         	BSTEST:
+              		; BIT STUCK TEST:
+              		; 1. Fills test area with 0FFH and checks for 0FFH.
+              		; 2. Then fills test area with 0's and tests for 0's.
+              		; 3. Then re-fills with 0FFH and tests
+              		;    just in case the bit was originally high in (1.).
+              	
+0322: 116108  		LXI	D,MBSTEST
+0325: CD0406  		CALL	PSTRING
+0328: 06FF    		MVI	B,0FFH
+032A: CDAE02  		CALL	WRMEM
+032D: CDBA02  		CALL	RDMEM
+0330: 0600    		MVI	B,00H
+0332: CDAE02  		CALL	WRMEM
+0335: CDBA02  		CALL	RDMEM
+0338: 06FF    		MVI	B,0FFH
+033A: CDAE02  		CALL	WRMEM
+033D: CDBA02  		CALL	RDMEM
+0340: C9      		RET
+              	
+0341:         	CBTEST:
+              		; CHECKERBOARD TEST:
+              		; Fill memory with 0AAH, 55H pattern and check.
+              		; This forms an alternating "checkerboard".
+              		; Then reverse the pattern and re-check.
+              	
+0341: 119D08  		LXI	D,MCBTEST
+0344: CD0406  		CALL	PSTRING
+0347: 0655    		MVI	B,55H
+0349: CD5203  		CALL	CBT0
+034C: 06AA    		MVI	B,0AAH
+034E: CD5203  		CALL	CBT0
+0351: C9      		RET
+              	
+0352:         	CBT0:
+0352: CDA302  		CALL	SETSE
+              	
+0355:         	CBT1:
+0355: 70      		MOV	M,B
+0356: 23      		INX	H
+0357: CD4706  		CALL	SUB16
+035A: DA6703  		JC	CBT2
+035D: 78      		MOV	A,B
+035E: 2F      		CMA
+035F: 77      		MOV	M,A
+0360: 23      		INX	H
+0361: CD4706  		CALL	SUB16
+0364: D25503  		JNC	CBT1
+              	
+0367:         	CBT2:
+0367: CDA302  		CALL	SETSE
+              	
+036A:         	CBT3:
+036A: 7E      		MOV	A,M
+036B: B8      		CMP	B
+036C: C46002  		CNZ	PBADMEM
+036F: 23      		INX	H
+0370: CD4706  		CALL	SUB16
+0373: D8      		RC
+0374: 78      		MOV	A,B
+0375: 2F      		CMA
+0376: 47      		MOV	B,A
+0377: 7E      		MOV	A,M
+0378: B8      		CMP	B
+0379: C46002  		CNZ	PBADMEM
+037C: 78      		MOV	A,B
+037D: 2F      		CMA
+037E: 47      		MOV	B,A
+037F: 23      		INX	H
+0380: CD4706  		CALL	SUB16
+0383: D26A03  		JNC	CBT3
+0386: C9      		RET
+              	
+0387:         	WBTEST:
+              		; WALKING BIT TEST:
+              		; Fill memory with one bit set for each byte.
+              		; The bit rotates at memory increases.
+              		; For example, byte 1 has bit 1 set, byte 2 bit 2 etc.
+              		; Then memory is checked for the proper pattern.
+              		; This is repeated 8 times, rotating the bit each time.
+              		; Then, the whole procedure is repeated rotating
+              		; the opposite way.
+              		; This is a very severe test that frequently detects
+              		; errors that other tests in the battery do not.
+              		; Don't be surprised if the walking bit "right" test
+              		; detects errors that "left" doesn't, or vice versa.
+              		; Sometimes memory developes strange pattern sensitive
+              		; errors that are most difficult to find.
+              	
+0387: 11BA08  		LXI	D,MWLTEST
+038A: CD0406  		CALL	PSTRING
+038D: 0680    		MVI	B,80H
+              	
+038F:         	WBT0:
+038F: CDAE03  		CALL	WBT2
+0392: 78      		MOV	A,B
+0393: 07      		RLC
+0394: 47      		MOV	B,A
+0395: FE80    		CPI	80H
+0397: C28F03  		JNZ	WBT0
+039A: 11D408  		LXI	D,MWRTEST
+039D: CD0406  		CALL	PSTRING
+03A0: 0601    		MVI	B,01H
+              	
+03A2:         	WBT1:
+03A2: CDD303  		CALL	WBT5
+03A5: 78      		MOV	A,B
+03A6: 0F      		RRC
+03A7: 47      		MOV	B,A
+03A8: FE01    		CPI	01H
+03AA: C2A203  		JNZ	WBT1
+03AD: C9      		RET
+              	
+03AE:         	WBT2:
+03AE: C5      		PUSH	B
+03AF: CDA302  		CALL	SETSE
+              	
+03B2:         	WBT3:
+03B2: 78      		MOV	A,B
+03B3: 07      		RLC
+03B4: 47      		MOV	B,A
+03B5: 77      		MOV	M,A
+03B6: 23      		INX	H
+03B7: CD4706  		CALL	SUB16
+03BA: D2B203  		JNC	WBT3
+03BD: CDA302  		CALL	SETSE
+03C0: C1      		POP	B
+03C1: C5      		PUSH	B
+              	
+03C2:         	WBT4:
+03C2: 78      		MOV	A,B
+03C3: 07      		RLC
+03C4: 47      		MOV	B,A
+03C5: 7E      		MOV	A,M
+03C6: B8      		CMP	B
+03C7: C46002  		CNZ	PBADMEM
+03CA: 23      		INX	H
+03CB: CD4706  		CALL	SUB16
+03CE: D2C203  		JNC	WBT4
+03D1: C1      		POP	B
+03D2: C9      		RET
+              	
+03D3:         	WBT5:
+03D3: C5      		PUSH	B
+03D4: CDA302  		CALL	SETSE
+              	
+03D7:         	WBT6:
+03D7: 78      		MOV	A,B
+03D8: 0F      		RRC
+03D9: 47      		MOV	B,A
+03DA: 77      		MOV	M,A
+03DB: 23      		INX	H
+03DC: CD4706  		CALL	SUB16
+03DF: D2D703  		JNC	WBT6
+03E2: CDA302  		CALL	SETSE
+03E5: C1      		POP	B
+03E6: C5      		PUSH	B
+              	
+03E7:         	WBT7:
+03E7: 78      		MOV	A,B
+03E8: 0F      		RRC
+03E9: 47      		MOV	B,A
+03EA: 7E      		MOV	A,M
+03EB: B8      		CMP	B
+03EC: C46002  		CNZ	PBADMEM
+03EF: 23      		INX	H
+03F0: CD4706  		CALL	SUB16
+03F3: D2E703  		JNC	WBT7
+03F6: C1      		POP	B
+03F7: C9      		RET
+              	
+03F8:         	ALTEST:
+              		; ADDRESS LINE SHORTED TEST:
+              		; This test will detect addressing problems in memory boards.
+              		; It fills all memory with 55H, then writes an 0AAH
+              		; at the lowest memory location tested.
+              		; It then rechecks the rest of memory to see if it is still 55H.
+              		; It then clears the original location of AAH and writes
+              		; writes the AAH into the next location.
+              		; Then does same with location 2,4,8,etc setting
+              		; a new address bit high each time and testing all of memory.
+              		; If any address bit is shorted to another,
+              		; the test will find an 0AAH in another location
+              		; than the place it wrote one.
+              	
+03F8: 11EE08  		LXI	D,MALTEST
+03FB: CD0406  		CALL	PSTRING
+03FE: 0655    		MVI	B,55H
+0400: CD0504  		CALL	ALT0
+0403: 06AA    		MVI	B,0AAH
+              	
+0405:         	ALT0:
+0405: CDAE02  		CALL	WRMEM
+0408: 78      		MOV	A,B
+0409: 32F800  		STA	00F8H		;0409	32 f8 00 	2 . . 
+040C: CDA302  		CALL	SETSE
+040F: 2F      		CMA
+0410: 77      		MOV	M,A
+0411: 23      		INX	H
+0412: CDBD02  		CALL	RDMEMHL
+0415: 010100  		LXI	B,WBOOT
+              	
+0418:         	ALT1:
+0418: 2AFC00  		LHLD	SADDR
+041B: 09      		DAD	B
+041C: D8      		RC
+041D: 7A      		MOV	A,D
+041E: 94      		SUB	H
+041F: D8      		RC
+0420: C22604  		JNZ	ALT2
+0423: 7B      		MOV	A,E
+0424: 95      		SUB	L
+0425: D8      		RC
+              	
+0426:         	ALT2:
+0426: 3AF800  		LDA	00F8H
+0429: C5      		PUSH	B
+042A: 47      		MOV	B,A
+042B: 2F      		CMA
+042C: 77      		MOV	M,A
+042D: 23      		INX	H
+042E: CD4706  		CALL	SUB16
+0431: DA3F04  		JC	ALT3
+0434: CDBD02  		CALL	RDMEMHL
+0437: E1      		POP	H
+0438: 29      		DAD	H
+0439: D8      		RC
+043A: 44      		MOV	B,H
+043B: 4D      		MOV	C,L
+043C: C31804  		JMP	ALT1
+              	
+043F:         	ALT3:
+043F: C1      		POP	B
+0440: C9      		RET
+              	
+0441:         	RNTEST:
+              		; RANDOM NUMBER TEST:
+              		; A random number routine generates an 8 bit number
+              		; pattern and writes it through all test memory.
+              		; It then re-inserts the same seed to the routine
+              		; and test reads the memory. A new seed is generated
+              		; and the exercise is repeated with a new pattern.
+              		; This test goes thru 8 cycles each time the battery
+              		; is run.  If "MEMR R" is used, it cycles continuously
+              		; until terminated with an ESC.
+              	
+0441: 110309  		LXI	D,MRNTEST
+0444: CD0406  		CALL	PSTRING
+0447: 0E31    		MVI	C,'1'
+              	
+0449:         	RNT0:
+0449: C5      		PUSH	B
+044A: CD5C04  		CALL	RNT1
+044D: CD4106  		CALL	PSPACE
+0450: C1      		POP	B
+0451: CD9609  		CALL	PCHAR
+0454: 0C      		INR	C
+0455: 3E39    		MVI	A,'9'
+0457: B9      		CMP	C
+0458: C24904  		JNZ	RNT0
+045B: C9      		RET
+              	
+045C:         	RNT1:
+045C: 2AF500  		LHLD	00F5H		;045c	2a f5 00 	* . . 
+045F: 22F300  		SHLD	TADDR
+0462: CDA302  		CALL	SETSE
+              	
+0465:         	RNT2:
+0465: CD8904  		CALL	RNT4
+0468: 70      		MOV	M,B
+0469: 23      		INX	H
+046A: CD4706  		CALL	SUB16
+046D: D26504  		JNC	RNT2
+0470: 2AF300  		LHLD	TADDR
+0473: 22F500  		SHLD	00F5H		;0473	22 f5 00 	" . . 
+0476: CDA302  		CALL	SETSE
+              	
+0479:         	RNT3:
+0479: CD8904  		CALL	RNT4
+047C: 7E      		MOV	A,M
+047D: B8      		CMP	B
+047E: C46002  		CNZ	PBADMEM
+0481: 23      		INX	H
+0482: CD4706  		CALL	SUB16
+0485: D27904  		JNC	RNT3
+0488: C9      		RET
+              	
+0489:         	RNT4:
+0489: E5      		PUSH	H
+048A: 2AF500  		LHLD	00F5H		;048a	2a f5 00 	* . . 
+048D: 7D      		MOV	A,L
+048E: AC      		XRA	H
+048F: 47      		MOV	B,A
+0490: 07      		RLC
+0491: 6F      		MOV	L,A
+0492: 84      		ADD	H
+0493: 67      		MOV	H,A
+0494: 22F500  		SHLD	00F5H		;0494	22 f5 00 	" . . 
+0497: E1      		POP	H
+0498: C9      		RET
+              	
+0499:         	M1TEST:
+              		; M1 CYCLE TEST
+              		; This tests the M1 cycle time for executing instructions
+              		; which is different than the time to simply read memory
+              		; in the Z-80.  The times are the same in 8080 so the
+              		; test is not especially useful for them.
+              		; A small segment of executing code "worms" its way thru
+              		; memory, reporting the results of its execution at each
+              		; memory location.  Marginal memory may pass all the other
+              		; tests but fail to execute properly at a given address.
+              		; When this happens, the test normally reports the error
+              		; location in the standard way.  However, the faulty execution
+              		; may cause the test to "bomb" at this point.
+              		;
+              		; By running the M1 test in the form "MEMR M", only this
+              		; test will run, reporting each address as it executes.
+              		; If a memory failure causes the test to bomb, the last
+              		; address displayed on the screen locates the failure address.
+              		; 
+              		; Please note that the M1 test (only) uses restart locations
+              		; 2 and 5 in its operation, and also inserts an error trap
+              		; at restart location 7, which is the most likely landing
+              		; place for a program gone wild.  That is, a program gone
+              		; haywire, jumping randomly all over memory, is likely at some
+              		; point to land in a location that has no memory which will
+              		; appear to contain the instruction 0FFH, which is a restart 7,
+              		; which causes the CPU to immediately jump to 38H, the restart
+              		; 7 location. We mention this because, it your computer happens
+              		; to use restarts 2, 5 or 7 for critical operations, this test
+              		; may not run.  That's why it is last.
+              	
+0499: 112209  		LXI	D,MM1TEST
+049C: CD0406  		CALL	PSTRING
+049F: C3AA04  		JMP	M1T0
+              	
+04A2:         	M1FLAG:
+04A2: 00      		DB	0
+              	
+04A3:         	M1B0:
+04A3: 00      		DB	0
+              	
+04A4:         	M1B1:
+04A4: 00      		DB	0
+              	
+04A5:         	M1ONLY:
+04A5: 3E4D    		MVI	A,'M'
+04A7: C3AB04  		JMP	M1T1
+              	
+04AA:         	M1T0:
+04AA: AF      		XRA	A
+              	
+04AB:         	M1T1:
+04AB: 32A204  		STA	M1FLAG
+04AE: 114305  		LXI	D,TRAP
+04B1: 213800  		LXI	H,RST7
+04B4: CD5B05  		CALL	SETRST
+04B7: 11E004  		LXI	D,M1T3
+04BA: 212800  		LXI	H,RST5
+04BD: CD5B05  		CALL	SETRST
+04C0: 112B05  		LXI	D,M1T6
+04C3: 211000  		LXI	H,RST2
+04C6: CD5B05  		CALL	SETRST
+04C9: 2AFC00  		LHLD	SADDR
+04CC: 7C      		MOV	A,H		; A=H of Start Address
+04CD: 2F      		CMA			;
+04CE: 32A404  		STA	M1B1		;
+04D1: 110D00  		LXI	D,000DH		;
+04D4: 19      		DAD	D		; HL=Start Address + 13
+04D5: 116F05  		LXI	D,ENDCB		; DE=End of code block
+              	
+04D8:         	M1T2:
+04D8: 060E    		MVI	B,14		; Move 14 bytes
+04DA: CD3A05  		CALL	M1T7		; from DE to HL in reverse
+04DD: 23      		INX	H
+04DE: 23      		INX	H
+04DF: E9      		PCHL			; Jump to code block at HL
+              	
+04E0:         	M1T3:
+              		; Called from RST 5
+              		; 
+              		; LHLD	M1B0
+              		; PUSH	H
+              		; MVI	A,0FFH
+              		; POP	D
+              		; RST	5
+              	
+04E0: E1      		POP	H
+04E1: 06FF    		MVI	B,0FFH
+04E3: B8      		CMP	B
+04E4: C46002  		CNZ	PBADMEM
+04E7: 3AA304  		LDA	M1B0
+04EA: 47      		MOV	B,A
+04EB: 7B      		MOV	A,E
+04EC: B8      		CMP	B
+04ED: C46002  		CNZ	PBADMEM
+04F0: 3AA404  		LDA	M1B1
+04F3: 47      		MOV	B,A
+04F4: 7A      		MOV	A,D
+04F5: B8      		CMP	B
+04F6: C46002  		CNZ	PBADMEM
+04F9: 3AA204  		LDA	M1FLAG
+04FC: FE4D    		CPI	'M'
+04FE: C20A05  		JNZ	M1T4
+0501: CD1606  		CALL	PWORD
+0504: CD3706  		CALL	PCRLF
+0507: C32605  		JMP	M1T5
+              	
+050A:         	M1T4:
+050A: 7C      		MOV	A,H
+050B: E6F0    		ANI	0F0H
+050D: 47      		MOV	B,A
+050E: 3AA404  		LDA	M1B1
+0511: E6F0    		ANI	0F0H
+0513: B8      		CMP	B
+0514: CA2605  		JZ	M1T5
+0517: 7C      		MOV	A,H
+0518: 32A404  		STA	M1B1
+051B: CD4106  		CALL	PSPACE
+051E: 7C      		MOV	A,H
+051F: 0F      		RRC
+0520: 0F      		RRC
+0521: 0F      		RRC
+0522: 0F      		RRC
+0523: CD2806  		CALL	PNIBBLE
+              	
+0526:         	M1T5:
+0526: AF      		XRA	A
+0527: 23      		INX	H
+0528: 23      		INX	H
+0529: 23      		INX	H
+052A: E9      		PCHL
+              	
+052B:         	M1T6:
+              		; Called from RST 2
+052B: 2AFE00  		LHLD	EADDR
+052E: EB      		XCHG
+052F: E1      		POP	H
+0530: CD4706  		CALL	SUB16
+0533: D8      		RC
+0534: 54      		MOV	D,H
+0535: 5D      		MOV	E,L
+0536: 1B      		DCX	D
+0537: C3D804  		JMP	M1T2
+              	
+053A:         	M1T7:
+053A: 1A      		LDAX	D
+053B: 77      		MOV	M,A
+053C: 1B      		DCX	D
+053D: 2B      		DCX	H
+053E: 05      		DCR	B
+053F: C23A05  		JNZ	M1T7
+0542: C9      		RET
+              	
+0543:         	TRAP:
+              		; Called from RST 7
+0543: 115005  		LXI	D,MTRAP
+0546: CD0406  		CALL	PSTRING
+0549: E1      		POP	H
+054A: 2B      		DCX	H
+054B: CD1606  		CALL	PWORD
+054E: 23      		INX	H
+054F: E9      		PCHL
+              	
+0550:         	MTRAP:
+0550: 0D0A    		DB	CR,LF
+0552: 54726170		DB	'Trap at ',0
+0556: 20617420	
+055A: 00      	
+              	
+055B:         	SETRST:
+055B: 36C3    		MVI	M,0C3H		; JMP opcode
+055D: 23      		INX	H
+055E: 73      		MOV	M,E
+055F: 23      		INX	H
+0560: 72      		MOV	M,D
+0561: C9      		RET
+              	;
+              	; Start of 14 byte code block
+              	;
+0562:         	CODEBLK:
+0562: FF      		RST	7		; TRAP
+0563: 2AA304  		LHLD	M1B0
+0566: E5      		PUSH	H
+0567: 3EFF    		MVI	A,0FFH
+0569: D1      		POP	D
+056A: EF      		RST	5		; M1T3
+056B: FF      		RST	7		; TRAP
+056C: FF      		RST	7		; TRAP
+056D: FF      		RST	7		; TRAP
+056E: 00      		NOP			; NOP
+056F:         	ENDCB:
+056F: D7      		RST	2
+              	;
+              	; End of 14 byte code block
+              	;
+              	
+0570:         	GETBYTE:
+0570: CD7A09  		CALL	GETCHAR
+0573: C8      		RZ
+0574: FE20    		CPI	' '
+0576: CA0001  		JZ	JSTART
+0579: FE03    		CPI	CTRLC
+057B: CAC109  		JZ	RESET
+057E: FE1B    		CPI	ESC
+0580: CA0001  		JZ	JSTART
+0583: CD9E05  		CALL	ATOI
+0586: F2BE05  		JP	INPERR
+0589: 0F      		RRC
+058A: 0F      		RRC
+058B: 0F      		RRC
+058C: 0F      		RRC
+058D: 5F      		MOV	E,A
+058E: D5      		PUSH	D
+058F: CD7A09  		CALL	GETCHAR
+0592: D1      		POP	D
+0593: CABE05  		JZ	INPERR
+0596: CD9E05  		CALL	ATOI
+0599: F2BE05  		JP	INPERR
+059C: B3      		ORA	E
+059D: C9      		RET
+              	
+059E:         	ATOI:
+              		; Covert ASCII character in A to decimal and return in A
+              		; Sign bit is set on error
+059E: CDB505  		CALL	TOUPPER	
+05A1: D630    		SUI	'0'
+05A3: FAB305  		JM	ATOI0	
+05A6: FE0A    		CPI	0AH
+05A8: F8      		RM
+05A9: D607    		SUI	07H
+05AB: FE0A    		CPI	0AH
+05AD: FAB305  		JM	ATOI0	
+05B0: FE10    		CPI	10H
+05B2: F8      		RM
+              	
+05B3:         	ATOI0:
+05B3: AF      		XRA	A
+05B4: C9      		RET
+              	
+05B5:         	TOUPPER:
+05B5: FE60    		CPI	'`'
+05B7: D8      		RC
+05B8: FE7B    		CPI	'{'
+05BA: D0      		RNC
+05BB: E65F    		ANI	'_'
+05BD: C9      		RET
+              	
+05BE:         	INPERR:
+05BE: E1      		POP	H
+05BF: 111A08  		LXI	D,MIERROR	;Input error
+05C2: CD0406  		CALL	PSTRING
+              	
+05C5:         	GETADDR:
+05C5: CD7005  		CALL	GETBYTE
+05C8: D8      		RC
+05C9: 67      		MOV	H,A
+05CA: 22F100  		SHLD	ADDRBUF
+05CD: CD7005  		CALL	GETBYTE
+05D0: 2AF100  		LHLD	ADDRBUF
+05D3: 6F      		MOV	L,A
+05D4: C9      		RET
+              	
+05D5:         	PBINARY:
+05D5: 5F      		MOV	E,A
+05D6: 1602    		MVI	D,02H
+05D8: CDFC05  		CALL	PSPACES		; Print 2 spaces
+05DB: 0602    		MVI	B,02H
+              	
+05DD:         	PBIN0:
+05DD: 1604    		MVI	D,04H
+              	
+05DF:         	PBIN1:
+05DF: 7B      		MOV	A,E
+05E0: 17      		RAL
+05E1: 5F      		MOV	E,A
+05E2: 0E30    		MVI	C,'0'
+05E4: D2E905  		JNC	PBIN2
+05E7: 0E31    		MVI	C,'1'
+              	
+05E9:         	PBIN2:
+05E9: CD9609  		CALL	PCHAR
+05EC: 15      		DCR	D
+05ED: C2DF05  		JNZ	PBIN1
+05F0: CD4106  		CALL	PSPACE
+05F3: 05      		DCR	B
+05F4: C2DD05  		JNZ	PBIN0
+05F7: C3FA05  		JMP	PSP4		;Print 4 spaces
+              	
+05FA:         	PSP4:
+05FA: 1604    		MVI	D,04H
+              	
+05FC:         	PSPACES:
+              		; Prints the number of spaces in D
+05FC: CD4106  		CALL	PSPACE
+05FF: 15      		DCR	D
+0600: C2FC05  		JNZ	PSPACES
+0603: C9      		RET
+              	
+0604:         	PSTRING:
+              		; Print string in D:E
+0604: 1A      		LDAX	D
+0605: B7      		ORA	A
+0606: C8      		RZ
+0607: 4F      		MOV	C,A
+0608: CD9609  		CALL	PCHAR
+060B: 13      		INX	D
+060C: C30406  		JMP	PSTRING
+060F: C9      		RET
+              	
+0610:         	PADDR:
+              		; Print 16-bit address in D:E followed by 4 spaces
+0610: CD1606  		CALL	PWORD
+0613: C3FA05  		JMP	PSP4		;Print 4 spaces
+              	
+0616:         	PWORD:
+              		; Print 16-bit word in D:E
+0616: 7C      		MOV	A,H
+0617: CD1F06  		CALL	PBYTE
+061A: 7D      		MOV	A,L
+061B: C31F06  		JMP	PBYTE
+              	
+061E:         	PBYTED:
+              		; Print byte with value in D
+061E: 7A      		MOV	A,D
+              	
+061F:         	PBYTE:
+              		; Print byte with value in A
+061F: F5      		PUSH	PSW
+0620: 0F      		RRC
+0621: 0F      		RRC
+0622: 0F      		RRC
+0623: 0F      		RRC
+0624: CD2806  		CALL	PNIBBLE
+0627: F1      		POP	PSW
+              	
+0628:         	PNIBBLE:
+0628: E60F    		ANI	0FH
+062A: FE0A    		CPI	0AH
+062C: FA3106  		JM	PN0
+062F: C607    		ADI	07H
+              	
+0631:         	PN0:
+0631: C630    		ADI	'0'
+0633: 4F      		MOV	C,A
+0634: C39609  		JMP	PCHAR
+              	
+0637:         	PCRLF:
+0637: 0E0D    		MVI	C,CR
+0639: CD9609  		CALL	PCHAR
+063C: 0E0A    		MVI	C,LF
+063E: C39609  		JMP	PCHAR
+              	
+0641:         	PSPACE:
+0641: 0E20    		MVI	C,' '
+0643: C39609  		JMP	PCHAR
+              	
+              		; ???
+0646: 23      		INX	H			;0646
+              		; ???
+0647:         	SUB16:
+0647: 7C      		MOV	A,H
+0648: B5      		ORA	L
+0649: 37      		STC
+064A: C8      		RZ
+064B: 7B      		MOV	A,E
+064C: 95      		SUB	L
+064D: 7A      		MOV	A,D
+064E: 9C      		SBB	H
+064F: C9      		RET
+              	
+0650:         	FINDTOP:
+0650: 21FF00  		LXI	H,00FFH
+              	
+0653:         	FT0:
+0653: 24      		INR	H
+0654: CA6106  		JZ	FT1
+0657: 46      		MOV	B,M
+0658: 7E      		MOV	A,M
+0659: 2F      		CMA
+065A: 77      		MOV	M,A
+065B: 4E      		MOV	C,M
+065C: B9      		CMP	C
+065D: 70      		MOV	M,B
+065E: CA5306  		JZ	FT0
+              	
+0661:         	FT1:
+0661: 25      		DCR	H
+0662: C9      		RET
+              	
+0663:         	MBLA:
+0663: 0D0A    		DB	CR,LF			;0663
+0665: 0D0A    		DB	CR,LF
+0667: 42494F53		DB	'BIOS located at ',0
+066B: 206C6F63	
+066F: 61746564	
+0673: 20617420	
+0677: 00      	
+              	
+0678:         	MTOP:
+0678: 20546F70		DB	' Top of memory at ',0	;0678
+067C: 206F6620	
+0680: 6D656D6F	
+0684: 72792061	
+0688: 742000  	
+              	
+068B:         	MKEYS:
+068B: 0D0A    		DB	CR,LF			;068b
+068D: 0D0A    		DB	CR,LF
+068F: 50726573		DB	'Press ESC or SPACE key to interrupt test'
+0693: 73204553	
+0697: 43206F72	
+069B: 20535041	
+069F: 4345206B	
+06A3: 65792074	
+06A7: 6F20696E	
+06AB: 74657272	
+06AF: 75707420	
+06B3: 74657374	
+06B7: 0D0A    		DB	CR,LF			;06b7
+06B9: 6F722043		DB	'or CONTROL C to reboot CP/M at any time. ',0
+06BD: 4F4E5452	
+06C1: 4F4C2043	
+06C5: 20746F20	
+06C9: 7265626F	
+06CD: 6F742043	
+06D1: 502F4D20	
+06D5: 61742061	
+06D9: 6E792074	
+06DD: 696D652E	
+06E1: 2000    	
+              	
+06E3:         	MDEF:
+06E3: 0D0A    		DB	CR,LF			;06e3
+06E5: 0D0A    		DB	CR,LF
+06E7: 52657370		DB	'Response of "CR" gives default test range'
+06EB: 6F6E7365	
+06EF: 206F6620	
+06F3: 22435222	
+06F7: 20676976	
+06FB: 65732064	
+06FF: 65666175	
+0703: 6C742074	
+0707: 65737420	
+070B: 72616E67	
+070F: 65      	
+0710: 0D0A    		DB	CR,LF
+0712: 77686963		DB	'which starts above this program and ends at BIOS.',0
+0716: 68207374	
+071A: 61727473	
+071E: 2061626F	
+0722: 76652074	
+0726: 68697320	
+072A: 70726F67	
+072E: 72616D20	
+0732: 616E6420	
+0736: 656E6473	
+073A: 20617420	
+073E: 42494F53	
+0742: 2E00    	
+              	
+0744:         	MCONT:
+0744: 0D0A    		DB	CR,LF			;0744
+0746: 22435222		DB	'"CR" to continue test - "ESC", "SP" or "^C" to stop ',0
+074A: 20746F20	
+074E: 636F6E74	
+0752: 696E7565	
+0756: 20746573	
+075A: 74202D20	
+075E: 22455343	
+0762: 222C2022	
+0766: 53502220	
+076A: 6F722022	
+076E: 5E432220	
+0772: 746F2073	
+0776: 746F7020	
+077A: 00      	
+              	
+077B:         	MSTADR:
+077B: 0D0A    		DB	CR,LF
+077D: 0D0A    		DB	CR,LF
+077F: 53746172		DB	'Starting address (Hex or "CR") ',0
+0783: 74696E67	
+0787: 20616464	
+078B: 72657373	
+078F: 20284865	
+0793: 78206F72	
+0797: 20224352	
+079B: 22292000	
+              	
+079F:         	MREST:
+079F: 0D0A    		DB	CR,LF			;079f
+07A1: 52652D65		DB	'Re-enter, starting address must be at least ',0
+07A5: 6E746572	
+07A9: 2C207374	
+07AD: 61727469	
+07B1: 6E672061	
+07B5: 64647265	
+07B9: 7373206D	
+07BD: 75737420	
+07C1: 62652061	
+07C5: 74206C65	
+07C9: 61737420	
+07CD: 00      	
+              	
+07CE:         	MENDADR:
+07CE: 0D0A    		DB	CR,LF			;07ce
+07D0: 0D0A    		DB	CR,LF			;07cf
+07D2: 456E6469		DB	'Ending address   (Hex or "CR") ',0
+07D6: 6E672061	
+07DA: 64647265	
+07DE: 73732020	
+07E2: 20284865	
+07E6: 78206F72	
+07EA: 20224352	
+07EE: 22292000	
+              	
+07F2:         	MREND:
+07F2: 0D0A    		DB	CR,LF			;07f2
+07F4: 52652D65		DB	'Re-enter, ending address below start ',0
+07F8: 6E746572	
+07FC: 2C20656E	
+0800: 64696E67	
+0804: 20616464	
+0808: 72657373	
+080C: 2062656C	
+0810: 6F772073	
+0814: 74617274	
+0818: 2000    	
+              	
+081A:         	MIERROR:
+081A: 0D0A    		DB	CR,LF			;081a
+081C: 496E7075		DB	'Input error - Retype 4 hex digits ',0
+0820: 74206572	
+0824: 726F7220	
+0828: 2D205265	
+082C: 74797065	
+0830: 20342068	
+0834: 65782064	
+0838: 69676974	
+083C: 732000  	
+              	
+083F:         	MFCTEST:
+083F: 0D0A    		DB	CR,LF
+0841: 46617374		DB	'Fast complement test from 0 to ',0
+0845: 20636F6D	
+0849: 706C656D	
+084D: 656E7420	
+0851: 74657374	
+0855: 2066726F	
+0859: 6D203020	
+085D: 746F2000	
+              	
+0861:         	MBSTEST:
+0861: 0D0A    		DB	CR,LF			;0861
+0863: 42697420		DB	'Bit stuck high or low test ',0
+0867: 73747563	
+086B: 6B206869	
+086F: 6768206F	
+0873: 72206C6F	
+0877: 77207465	
+087B: 73742000	
+              	
+087F:         	MABTEST:
+087F: 0D0A    		DB	CR,LF
+0881: 41646A61		DB	'Adjacent bits shorted test ',0
+0885: 63656E74	
+0889: 20626974	
+088D: 73207368	
+0891: 6F727465	
+0895: 64207465	
+0899: 73742000	
+              	
+089D:         	MCBTEST:
+089D: 0D0A    		DB	CR,LF			;089d
+089F: 43686563		DB	'Checkerboard pattern test ',0
+08A3: 6B657262	
+08A7: 6F617264	
+08AB: 20706174	
+08AF: 7465726E	
+08B3: 20746573	
+08B7: 742000  	
+              	
+08BA:         	MWLTEST:
+08BA: 0D0A    		DB	CR,LF			;08ba
+08BC: 57616C6B		DB	'Walking bit  left test ',0
+08C0: 696E6720	
+08C4: 62697420	
+08C8: 206C6566	
+08CC: 74207465	
+08D0: 73742000	
+              	
+08D4:         	MWRTEST:
+08D4: 0D0A    		DB	CR,LF			;08d4
+08D6: 57616C6B		DB	'Walking bit right test ',0
+08DA: 696E6720	
+08DE: 62697420	
+08E2: 72696768	
+08E6: 74207465	
+08EA: 73742000	
+              	
+08EE:         	MALTEST:
+08EE: 0D0A    		DB	CR,LF			;08ee
+08F0: 41646472		DB	'Address line test ',0
+08F4: 65737320	
+08F8: 6C696E65	
+08FC: 20746573	
+0900: 742000  	
+              	
+0903:         	MRNTEST:
+0903: 0D0A    		DB	CR,LF			;0903
+0905: 52616E64		DB	'Random number test - Cycle: ',0
+0909: 6F6D206E	
+090D: 756D6265	
+0911: 72207465	
+0915: 7374202D	
+0919: 20437963	
+091D: 6C653A20	
+0921: 00      	
+              	
+0922:         	MM1TEST:
+0922: 0D0A    		DB	CR,LF			;0922
+0924: 4D312063		DB	'M1 cycle test - 4K block: ',0
+0928: 79636C65	
+092C: 20746573	
+0930: 74202D20	
+0934: 344B2062	
+0938: 6C6F636B	
+093C: 3A2000  	
+              	
+093F:         	MDONE:
+093F: 0D0A    		DB	CR,LF			;093f
+0941: 54657374		DB	'Test series complete',0
+0945: 20736572	
+0949: 69657320	
+094D: 636F6D70	
+0951: 6C657465	
+0955: 00      	
+              	
+0956:         	MLOC:
+0956: 4C4F4341		DB	'LOCATION  SHOULD BE           WAS',CR,LF,0
+095A: 54494F4E	
+095E: 20205348	
+0962: 4F554C44	
+0966: 20424520	
+096A: 20202020	
+096E: 20202020	
+0972: 20205741	
+0976: 530D0A00	
+              	
+097A:         	GETCHAR:
+097A: E5      		PUSH	H
+097B: D5      		PUSH	D
+097C: C5      		PUSH	B
+097D: CD0C01  		CALL	JCONIN
+0980: FE0D    		CPI	CR
+0982: 37      		STC
+0983: CA8D09  		JZ	GC0
+0986: B7      		ORA	A
+0987: F5      		PUSH	PSW
+0988: 4F      		MOV	C,A
+0989: CD9609  		CALL	PCHAR
+098C: F1      		POP	PSW
+              	
+098D:         	GC0:
+098D: C1      		POP	B
+098E: D1      		POP	D
+098F: E1      		POP	H
+0990: D8      		RC
+0991: CDB009  		CALL	CMDCHAR
+0994: B7      		ORA	A
+0995: C9      		RET
+              	
+0996:         	PCHAR:
+0996: E5      		PUSH	H
+0997: D5      		PUSH	D
+0998: C5      		PUSH	B
+0999: CD0F01  		CALL	JCONOUT
+099C: C1      		POP	B
+099D: D1      		POP	D
+099E: E1      		POP	H
+              	
+099F:         	GETC:
+099F: E5      		PUSH	H
+09A0: D5      		PUSH	D
+09A1: C5      		PUSH	B
+09A2: CD0901  		CALL	JCONST
+09A5: B7      		ORA	A
+09A6: CAAC09  		JZ	GETC0
+09A9: CD0C01  		CALL	JCONIN
+              	
+09AC:         	GETC0:
+09AC: C1      		POP	B
+09AD: D1      		POP	D
+09AE: E1      		POP	H
+09AF: C8      		RZ
+              	
+09B0:         	CMDCHAR:
+09B0: FE20    		CPI	' '
+09B2: CA6901  		JZ	START
+09B5: FE1B    		CPI	ESC
+09B7: CA6901  		JZ	START
+09BA: FE03    		CPI	CTRLC
+09BC: CAC109  		JZ	RESET
+09BF: B7      		ORA	A
+09C0: C9      		RET
+              	
+09C1:         	RESET:
+09C1: 31F000  		LXI	SP,STACK
+09C4: C30601  		JMP	JMON
+              	
+09C7:         	CONST:
+09C7: C30600  		JMP	0006H		;09c7	c3 06 00 	. . . 
+              	
+09CA:         	CONIN:
+09CA: C30900  		JMP	0009H		;09ca	c3 09 00 	. . . 
+              	
+09CD:         	CONOUT:
+09CD: C30C00  		JMP	000CH		;09cd	c3 0c 00 	. . . 
+              	
+09D0:         	CINIT:
+09D0: 3A0200  		LDA	WBOOT+1
+09D3: 32C909  		STA	CONST+2
+09D6: 32CC09  		STA	CONIN+2
+09D9: 32CF09  		STA	CONOUT+2
+09DC: C9      		RET
+              	
+09DD:         	TFIRST:
+09DD: 00000000		DB	0,0,0,0,0,0,0,0
+09E1: 00000000	
+09E5: 00000000		DB	0,0,0,0,0,0,0,0
+09E9: 00000000	
+09ED: 00000000		DB	0,0,0,0,0,0,0,0
+09F1: 00000000	
+09F5: 00000000		DB	0,0,0,0,0,0,0,0
+09F9: 00000000	
+09FD: 000000  		DB	0,0,0
+
+
+; +++ segments +++
+
+#CODE          = $0100 =   256,  size = $0900 =  2304
+
+; +++ global symbols +++
+
+_8080_     = $0001 =     1          :1 (unused)
+_asm8080_  = $0001 =     1          :1 (unused)
+_casefold_ = $0001 =     1          :1 (unused)
+_end       = $0A00 =  2560          memr.asm:33 (unused)
+_size      = $0900 =  2304          memr.asm:33 (unused)
+abt0       = $030E =   782          memr.asm:298
+abt1       = $0316 =   790          memr.asm:304
+abtest     = $0306 =   774          memr.asm:286
+addrbuf    = $00F1 =   241          memr.asm:19
+alt0       = $0405 =  1029          memr.asm:505
+alt1       = $0418 =  1048          memr.asm:516
+alt2       = $0426 =  1062          memr.asm:528
+alt3       = $043F =  1087          memr.asm:545
+altest     = $03F8 =  1016          memr.asm:485
+args       = $0082 =   130          memr.asm:16
+atoi       = $059E =  1438          memr.asm:834
+atoi0      = $05B3 =  1459          memr.asm:848
+bstest     = $0322 =   802          memr.asm:314
+cbt0       = $0352 =   850          memr.asm:348
+cbt1       = $0355 =   853          memr.asm:351
+cbt2       = $0367 =   871          memr.asm:363
+cbt3       = $036A =   874          memr.asm:366
+cbtest     = $0341 =   833          memr.asm:334
+cinit      = $09D0 =  2512          memr.asm:1163
+cmdchar    = $09B0 =  2480          memr.asm:1140
+codeblk    = $0562 =  1378          memr.asm:792 (unused)
+config     = $01C6 =   454          memr.asm:92
+config0    = $01F1 =   497          memr.asm:108
+conin      = $09CA =  2506          memr.asm:1157
+conout     = $09CD =  2509          memr.asm:1160
+const      = $09C7 =  2503          memr.asm:1154
+cr         = $000D =    13          memr.asm:27
+ctrlc      = $0003 =     3          memr.asm:26
+eaddr      = $00FE =   254          memr.asm:24
+endcb      = $056F =  1391          memr.asm:803
+esc        = $001B =    27          memr.asm:29
+fctest     = $02CF =   719          memr.asm:244
+fctest0    = $02F1 =   753          memr.asm:267
+fctest1    = $02F9 =   761          memr.asm:277
+findtop    = $0650 =  1616          memr.asm:983
+ft0        = $0653 =  1619          memr.asm:986
+ft1        = $0661 =  1633          memr.asm:998
+gc0        = $098D =  2445          memr.asm:1107
+gend       = $0232 =   562          memr.asm:138
+gend0      = $0244 =   580          memr.asm:148
+gend1      = $0258 =   600          memr.asm:158
+getaddr    = $05C5 =  1477          memr.asm:865
+getbyte    = $0570 =  1392          memr.asm:809
+getc       = $099F =  2463          memr.asm:1125
+getc0      = $09AC =  2476          memr.asm:1134
+getchar    = $097A =  2426          memr.asm:1093
+gstart     = $0203 =   515          memr.asm:116
+gstart0    = $0211 =   529          memr.asm:123
+inperr     = $05BE =  1470          memr.asm:860
+jcinit     = $0103 =   259          memr.asm:39
+jconin     = $010C =   268          memr.asm:42
+jconout    = $010F =   271          memr.asm:43
+jconst     = $0109 =   265          memr.asm:41
+jmon       = $0106 =   262          memr.asm:40
+jstart     = $0100 =   256          memr.asm:38
+lf         = $000A =    10          memr.asm:28
+linecnt    = $00F9 =   249          memr.asm:21
+lines      = $0012 =    18          memr.asm:31
+m1b0       = $04A3 =  1187          memr.asm:653
+m1b1       = $04A4 =  1188          memr.asm:656
+m1flag     = $04A2 =  1186          memr.asm:650
+m1only     = $04A5 =  1189          memr.asm:659
+m1t0       = $04AA =  1194          memr.asm:663
+m1t1       = $04AB =  1195          memr.asm:666
+m1t2       = $04D8 =  1240          memr.asm:685
+m1t3       = $04E0 =  1248          memr.asm:692
+m1t4       = $050A =  1290          memr.asm:722
+m1t5       = $0526 =  1318          memr.asm:740
+m1t6       = $052B =  1323          memr.asm:747
+m1t7       = $053A =  1338          memr.asm:759
+m1test     = $0499 =  1177          memr.asm:615
+mabtest    = $087F =  2175          memr.asm:1058
+maltest    = $08EE =  2286          memr.asm:1074
+mbanner    = $0114 =   276          memr.asm:47
+mbla       = $0663 =  1635          memr.asm:1002
+mbstest    = $0861 =  2145          memr.asm:1054
+mcbtest    = $089D =  2205          memr.asm:1062
+mcont      = $0744 =  1860          memr.asm:1024
+mdef       = $06E3 =  1763          memr.asm:1017
+mdone      = $093F =  2367          memr.asm:1086
+memtop     = $00FA =   250          memr.asm:22
+mendadr    = $07CE =  1998          memr.asm:1037
+mfctest    = $083F =  2111          memr.asm:1050
+mierror    = $081A =  2074          memr.asm:1046
+mkeys      = $068B =  1675          memr.asm:1010
+mloc       = $0956 =  2390          memr.asm:1090
+mm1test    = $0922 =  2338          memr.asm:1082
+monitor    = $0000 =     0          memr.asm:8
+mrend      = $07F2 =  2034          memr.asm:1042
+mrest      = $079F =  1951          memr.asm:1033
+mrntest    = $0903 =  2307          memr.asm:1078
+mstadr     = $077B =  1915          memr.asm:1028
+mtop       = $0678 =  1656          memr.asm:1007
+mtrap      = $0550 =  1360          memr.asm:778
+mwltest    = $08BA =  2234          memr.asm:1066
+mwrtest    = $08D4 =  2260          memr.asm:1070
+paddr      = $0610 =  1552          memr.asm:922
+pbadmem    = $0260 =   608          memr.asm:164
+pbin0      = $05DD =  1501          memr.asm:881
+pbin1      = $05DF =  1503          memr.asm:884
+pbin2      = $05E9 =  1513          memr.asm:892
+pbinary    = $05D5 =  1493          memr.asm:875
+pbm0       = $029F =   671          memr.asm:195
+pbyte      = $061F =  1567          memr.asm:938
+pbyted     = $061E =  1566          memr.asm:934
+pchar      = $0996 =  2454          memr.asm:1116
+pcrlf      = $0637 =  1591          memr.asm:959
+pdone      = $01A4 =   420          memr.asm:77
+pend       = $022C =   556          memr.asm:135
+pn0        = $0631 =  1585          memr.asm:954
+pnibble    = $0628 =  1576          memr.asm:948
+psp4       = $05FA =  1530          memr.asm:901
+pspace     = $0641 =  1601          memr.asm:965
+pspaces    = $05FC =  1532          memr.asm:904
+pstart     = $01FD =   509          memr.asm:113
+pstring    = $0604 =  1540          memr.asm:911
+pword      = $0616 =  1558          memr.asm:927
+rdmem      = $02BA =   698          memr.asm:223
+rdmem0     = $02C2 =   706          memr.asm:234
+rdmemhl    = $02BD =   701          memr.asm:227
+reset      = $09C1 =  2497          memr.asm:1150
+rnt0       = $0449 =  1097          memr.asm:564
+rnt1       = $045C =  1116          memr.asm:576
+rnt2       = $0465 =  1125          memr.asm:581
+rnt3       = $0479 =  1145          memr.asm:591
+rnt4       = $0489 =  1161          memr.asm:601
+rntest     = $0441 =  1089          memr.asm:549
+rst2       = $0010 =    16          memr.asm:12
+rst5       = $0028 =    40          memr.asm:13
+rst7       = $0038 =    56          memr.asm:14
+runall     = $01AD =   429          memr.asm:82
+saddr      = $00FC =   252          memr.asm:23
+setrst     = $055B =  1371          memr.asm:782
+setse      = $02A3 =   675          memr.asm:201
+stack      = $00F0 =   240          memr.asm:18
+start      = $0169 =   361          memr.asm:52
+sub16      = $0647 =  1607          memr.asm:972
+taddr      = $00F3 =   243          memr.asm:20
+tfirst     = $09DD =  2525          memr.asm:1170
+toupper    = $05B5 =  1461          memr.asm:852
+tpa        = $0100 =   256          memr.asm:10
+trap       = $0543 =  1347          memr.asm:768
+tstloop    = $0189 =   393          memr.asm:65
+wboot      = $0001 =     1          memr.asm:9
+wbt0       = $038F =   911          memr.asm:407
+wbt1       = $03A2 =   930          memr.asm:418
+wbt2       = $03AE =   942          memr.asm:427
+wbt3       = $03B2 =   946          memr.asm:431
+wbt4       = $03C2 =   962          memr.asm:443
+wbt5       = $03D3 =   979          memr.asm:456
+wbt6       = $03D7 =   983          memr.asm:460
+wbt7       = $03E7 =   999          memr.asm:472
+wbtest     = $0387 =   903          memr.asm:387
+wrmem      = $02AE =   686          memr.asm:210
+wrmem0     = $02B1 =   689          memr.asm:215
+
+
+total time: 0.0211 sec.
+no errors

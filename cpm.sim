@@ -1,0 +1,4 @@
+set cpu 8080
+attach dsk0 lifeboat.dsk
+load dbl.bin ff00
+go ff00
