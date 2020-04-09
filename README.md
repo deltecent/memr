@@ -18,3 +18,7 @@ check their memory system.
 >The program performs a battery of tests to test memory under a variety of conditions.  If a test fails in any given memory location, that location will be displayed on the console along with the byte that should have been in memory and the actual value in both HEX and binary bits. This may be a further aid to find out what is wrong. If multiple errors are reported, the test will display a screen full of error reports, one to a line, and then wait for you to press a key to continue.  Until the screen if full of error reports, the test will continuously cycle.
 
 The source code was reconstructed from the binary image of `MEMR.COM` distributed on the `lifeboat.dsk` CP/M image downloaded from [DERAMP.COM](https://deramp.com/downloads/altair/software/8_inch_floppy/CPM/CPM%202.2/Lifeboat%20CPM/).
+
+The source code will assemble using `zasm` or with `ASM.COM` on a CP/M system.
+
+The files necessary to use the `AltairZ80` emulator are also in the repository.
