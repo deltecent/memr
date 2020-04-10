@@ -5,7 +5,7 @@
 ; Copyright (C) 1980 Lifeboat Associates
 ;
 ; Reconstructed from memory image on April 9, 2020
-; by Patrick A Llinstruth (patrick@deltecent.com)
+; by Patrick A Linstruth (patrick@deltecent.com)
 ;
 
 
