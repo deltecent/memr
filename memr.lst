@@ -1,7 +1,7 @@
               	; --------------------------------------
               	; zasm: assemble "memr.asm"
               	; opts: --asm8080
-              	; date: 2020-04-09 16:36:26
+              	; date: 2020-04-09 19:42:27
               	; --------------------------------------
 
 
@@ -11,6 +11,10 @@
               	;
               	; Copyright (C) 1980 Lifeboat Associates
               	;
+              	; Reconstructed from memory image on April 9, 2020
+              	; by Patrick A Linstruth (patrick@deltecent.com)
+              	;
+              	
               	
 0000:         	MONITOR	EQU	0000H
 0001:         	WBOOT	EQU	0001H
@@ -1385,164 +1389,164 @@
 _8080_     = $0001 =     1          :1 (unused)
 _asm8080_  = $0001 =     1          :1 (unused)
 _casefold_ = $0001 =     1          :1 (unused)
-_end       = $0A00 =  2560          memr.asm:33 (unused)
-_size      = $0900 =  2304          memr.asm:33 (unused)
-abt0       = $030E =   782          memr.asm:298
-abt1       = $0316 =   790          memr.asm:304
-abtest     = $0306 =   774          memr.asm:286
-addrbuf    = $00F1 =   241          memr.asm:19
-alt0       = $0405 =  1029          memr.asm:505
-alt1       = $0418 =  1048          memr.asm:516
-alt2       = $0426 =  1062          memr.asm:528
-alt3       = $043F =  1087          memr.asm:545
-altest     = $03F8 =  1016          memr.asm:485
-args       = $0082 =   130          memr.asm:16
-atoi       = $059E =  1438          memr.asm:834
-atoi0      = $05B3 =  1459          memr.asm:848
-bstest     = $0322 =   802          memr.asm:314
-cbt0       = $0352 =   850          memr.asm:348
-cbt1       = $0355 =   853          memr.asm:351
-cbt2       = $0367 =   871          memr.asm:363
-cbt3       = $036A =   874          memr.asm:366
-cbtest     = $0341 =   833          memr.asm:334
-cinit      = $09D0 =  2512          memr.asm:1163
-cmdchar    = $09B0 =  2480          memr.asm:1140
-codeblk    = $0562 =  1378          memr.asm:792 (unused)
-config     = $01C6 =   454          memr.asm:92
-config0    = $01F1 =   497          memr.asm:108
-conin      = $09CA =  2506          memr.asm:1157
-conout     = $09CD =  2509          memr.asm:1160
-const      = $09C7 =  2503          memr.asm:1154
-cr         = $000D =    13          memr.asm:27
-ctrlc      = $0003 =     3          memr.asm:26
-eaddr      = $00FE =   254          memr.asm:24
-endcb      = $056F =  1391          memr.asm:803
-esc        = $001B =    27          memr.asm:29
-fctest     = $02CF =   719          memr.asm:244
-fctest0    = $02F1 =   753          memr.asm:267
-fctest1    = $02F9 =   761          memr.asm:277
-findtop    = $0650 =  1616          memr.asm:983
-ft0        = $0653 =  1619          memr.asm:986
-ft1        = $0661 =  1633          memr.asm:998
-gc0        = $098D =  2445          memr.asm:1107
-gend       = $0232 =   562          memr.asm:138
-gend0      = $0244 =   580          memr.asm:148
-gend1      = $0258 =   600          memr.asm:158
-getaddr    = $05C5 =  1477          memr.asm:865
-getbyte    = $0570 =  1392          memr.asm:809
-getc       = $099F =  2463          memr.asm:1125
-getc0      = $09AC =  2476          memr.asm:1134
-getchar    = $097A =  2426          memr.asm:1093
-gstart     = $0203 =   515          memr.asm:116
-gstart0    = $0211 =   529          memr.asm:123
-inperr     = $05BE =  1470          memr.asm:860
-jcinit     = $0103 =   259          memr.asm:39
-jconin     = $010C =   268          memr.asm:42
-jconout    = $010F =   271          memr.asm:43
-jconst     = $0109 =   265          memr.asm:41
-jmon       = $0106 =   262          memr.asm:40
-jstart     = $0100 =   256          memr.asm:38
-lf         = $000A =    10          memr.asm:28
-linecnt    = $00F9 =   249          memr.asm:21
-lines      = $0012 =    18          memr.asm:31
-m1b0       = $04A3 =  1187          memr.asm:653
-m1b1       = $04A4 =  1188          memr.asm:656
-m1flag     = $04A2 =  1186          memr.asm:650
-m1only     = $04A5 =  1189          memr.asm:659
-m1t0       = $04AA =  1194          memr.asm:663
-m1t1       = $04AB =  1195          memr.asm:666
-m1t2       = $04D8 =  1240          memr.asm:685
-m1t3       = $04E0 =  1248          memr.asm:692
-m1t4       = $050A =  1290          memr.asm:722
-m1t5       = $0526 =  1318          memr.asm:740
-m1t6       = $052B =  1323          memr.asm:747
-m1t7       = $053A =  1338          memr.asm:759
-m1test     = $0499 =  1177          memr.asm:615
-mabtest    = $087F =  2175          memr.asm:1058
-maltest    = $08EE =  2286          memr.asm:1074
-mbanner    = $0114 =   276          memr.asm:47
-mbla       = $0663 =  1635          memr.asm:1002
-mbstest    = $0861 =  2145          memr.asm:1054
-mcbtest    = $089D =  2205          memr.asm:1062
-mcont      = $0744 =  1860          memr.asm:1024
-mdef       = $06E3 =  1763          memr.asm:1017
-mdone      = $093F =  2367          memr.asm:1086
-memtop     = $00FA =   250          memr.asm:22
-mendadr    = $07CE =  1998          memr.asm:1037
-mfctest    = $083F =  2111          memr.asm:1050
-mierror    = $081A =  2074          memr.asm:1046
-mkeys      = $068B =  1675          memr.asm:1010
-mloc       = $0956 =  2390          memr.asm:1090
-mm1test    = $0922 =  2338          memr.asm:1082
-monitor    = $0000 =     0          memr.asm:8
-mrend      = $07F2 =  2034          memr.asm:1042
-mrest      = $079F =  1951          memr.asm:1033
-mrntest    = $0903 =  2307          memr.asm:1078
-mstadr     = $077B =  1915          memr.asm:1028
-mtop       = $0678 =  1656          memr.asm:1007
-mtrap      = $0550 =  1360          memr.asm:778
-mwltest    = $08BA =  2234          memr.asm:1066
-mwrtest    = $08D4 =  2260          memr.asm:1070
-paddr      = $0610 =  1552          memr.asm:922
-pbadmem    = $0260 =   608          memr.asm:164
-pbin0      = $05DD =  1501          memr.asm:881
-pbin1      = $05DF =  1503          memr.asm:884
-pbin2      = $05E9 =  1513          memr.asm:892
-pbinary    = $05D5 =  1493          memr.asm:875
-pbm0       = $029F =   671          memr.asm:195
-pbyte      = $061F =  1567          memr.asm:938
-pbyted     = $061E =  1566          memr.asm:934
-pchar      = $0996 =  2454          memr.asm:1116
-pcrlf      = $0637 =  1591          memr.asm:959
-pdone      = $01A4 =   420          memr.asm:77
-pend       = $022C =   556          memr.asm:135
-pn0        = $0631 =  1585          memr.asm:954
-pnibble    = $0628 =  1576          memr.asm:948
-psp4       = $05FA =  1530          memr.asm:901
-pspace     = $0641 =  1601          memr.asm:965
-pspaces    = $05FC =  1532          memr.asm:904
-pstart     = $01FD =   509          memr.asm:113
-pstring    = $0604 =  1540          memr.asm:911
-pword      = $0616 =  1558          memr.asm:927
-rdmem      = $02BA =   698          memr.asm:223
-rdmem0     = $02C2 =   706          memr.asm:234
-rdmemhl    = $02BD =   701          memr.asm:227
-reset      = $09C1 =  2497          memr.asm:1150
-rnt0       = $0449 =  1097          memr.asm:564
-rnt1       = $045C =  1116          memr.asm:576
-rnt2       = $0465 =  1125          memr.asm:581
-rnt3       = $0479 =  1145          memr.asm:591
-rnt4       = $0489 =  1161          memr.asm:601
-rntest     = $0441 =  1089          memr.asm:549
-rst2       = $0010 =    16          memr.asm:12
-rst5       = $0028 =    40          memr.asm:13
-rst7       = $0038 =    56          memr.asm:14
-runall     = $01AD =   429          memr.asm:82
-saddr      = $00FC =   252          memr.asm:23
-setrst     = $055B =  1371          memr.asm:782
-setse      = $02A3 =   675          memr.asm:201
-stack      = $00F0 =   240          memr.asm:18
-start      = $0169 =   361          memr.asm:52
-sub16      = $0647 =  1607          memr.asm:972
-taddr      = $00F3 =   243          memr.asm:20
-tfirst     = $09DD =  2525          memr.asm:1170
-toupper    = $05B5 =  1461          memr.asm:852
-tpa        = $0100 =   256          memr.asm:10
-trap       = $0543 =  1347          memr.asm:768
-tstloop    = $0189 =   393          memr.asm:65
-wboot      = $0001 =     1          memr.asm:9
-wbt0       = $038F =   911          memr.asm:407
-wbt1       = $03A2 =   930          memr.asm:418
-wbt2       = $03AE =   942          memr.asm:427
-wbt3       = $03B2 =   946          memr.asm:431
-wbt4       = $03C2 =   962          memr.asm:443
-wbt5       = $03D3 =   979          memr.asm:456
-wbt6       = $03D7 =   983          memr.asm:460
-wbt7       = $03E7 =   999          memr.asm:472
-wbtest     = $0387 =   903          memr.asm:387
-wrmem      = $02AE =   686          memr.asm:210
-wrmem0     = $02B1 =   689          memr.asm:215
+_end       = $0A00 =  2560          memr.asm:37 (unused)
+_size      = $0900 =  2304          memr.asm:37 (unused)
+abt0       = $030E =   782          memr.asm:302
+abt1       = $0316 =   790          memr.asm:308
+abtest     = $0306 =   774          memr.asm:290
+addrbuf    = $00F1 =   241          memr.asm:23
+alt0       = $0405 =  1029          memr.asm:509
+alt1       = $0418 =  1048          memr.asm:520
+alt2       = $0426 =  1062          memr.asm:532
+alt3       = $043F =  1087          memr.asm:549
+altest     = $03F8 =  1016          memr.asm:489
+args       = $0082 =   130          memr.asm:20
+atoi       = $059E =  1438          memr.asm:838
+atoi0      = $05B3 =  1459          memr.asm:852
+bstest     = $0322 =   802          memr.asm:318
+cbt0       = $0352 =   850          memr.asm:352
+cbt1       = $0355 =   853          memr.asm:355
+cbt2       = $0367 =   871          memr.asm:367
+cbt3       = $036A =   874          memr.asm:370
+cbtest     = $0341 =   833          memr.asm:338
+cinit      = $09D0 =  2512          memr.asm:1167
+cmdchar    = $09B0 =  2480          memr.asm:1144
+codeblk    = $0562 =  1378          memr.asm:796 (unused)
+config     = $01C6 =   454          memr.asm:96
+config0    = $01F1 =   497          memr.asm:112
+conin      = $09CA =  2506          memr.asm:1161
+conout     = $09CD =  2509          memr.asm:1164
+const      = $09C7 =  2503          memr.asm:1158
+cr         = $000D =    13          memr.asm:31
+ctrlc      = $0003 =     3          memr.asm:30
+eaddr      = $00FE =   254          memr.asm:28
+endcb      = $056F =  1391          memr.asm:807
+esc        = $001B =    27          memr.asm:33
+fctest     = $02CF =   719          memr.asm:248
+fctest0    = $02F1 =   753          memr.asm:271
+fctest1    = $02F9 =   761          memr.asm:281
+findtop    = $0650 =  1616          memr.asm:987
+ft0        = $0653 =  1619          memr.asm:990
+ft1        = $0661 =  1633          memr.asm:1002
+gc0        = $098D =  2445          memr.asm:1111
+gend       = $0232 =   562          memr.asm:142
+gend0      = $0244 =   580          memr.asm:152
+gend1      = $0258 =   600          memr.asm:162
+getaddr    = $05C5 =  1477          memr.asm:869
+getbyte    = $0570 =  1392          memr.asm:813
+getc       = $099F =  2463          memr.asm:1129
+getc0      = $09AC =  2476          memr.asm:1138
+getchar    = $097A =  2426          memr.asm:1097
+gstart     = $0203 =   515          memr.asm:120
+gstart0    = $0211 =   529          memr.asm:127
+inperr     = $05BE =  1470          memr.asm:864
+jcinit     = $0103 =   259          memr.asm:43
+jconin     = $010C =   268          memr.asm:46
+jconout    = $010F =   271          memr.asm:47
+jconst     = $0109 =   265          memr.asm:45
+jmon       = $0106 =   262          memr.asm:44
+jstart     = $0100 =   256          memr.asm:42
+lf         = $000A =    10          memr.asm:32
+linecnt    = $00F9 =   249          memr.asm:25
+lines      = $0012 =    18          memr.asm:35
+m1b0       = $04A3 =  1187          memr.asm:657
+m1b1       = $04A4 =  1188          memr.asm:660
+m1flag     = $04A2 =  1186          memr.asm:654
+m1only     = $04A5 =  1189          memr.asm:663
+m1t0       = $04AA =  1194          memr.asm:667
+m1t1       = $04AB =  1195          memr.asm:670
+m1t2       = $04D8 =  1240          memr.asm:689
+m1t3       = $04E0 =  1248          memr.asm:696
+m1t4       = $050A =  1290          memr.asm:726
+m1t5       = $0526 =  1318          memr.asm:744
+m1t6       = $052B =  1323          memr.asm:751
+m1t7       = $053A =  1338          memr.asm:763
+m1test     = $0499 =  1177          memr.asm:619
+mabtest    = $087F =  2175          memr.asm:1062
+maltest    = $08EE =  2286          memr.asm:1078
+mbanner    = $0114 =   276          memr.asm:51
+mbla       = $0663 =  1635          memr.asm:1006
+mbstest    = $0861 =  2145          memr.asm:1058
+mcbtest    = $089D =  2205          memr.asm:1066
+mcont      = $0744 =  1860          memr.asm:1028
+mdef       = $06E3 =  1763          memr.asm:1021
+mdone      = $093F =  2367          memr.asm:1090
+memtop     = $00FA =   250          memr.asm:26
+mendadr    = $07CE =  1998          memr.asm:1041
+mfctest    = $083F =  2111          memr.asm:1054
+mierror    = $081A =  2074          memr.asm:1050
+mkeys      = $068B =  1675          memr.asm:1014
+mloc       = $0956 =  2390          memr.asm:1094
+mm1test    = $0922 =  2338          memr.asm:1086
+monitor    = $0000 =     0          memr.asm:12
+mrend      = $07F2 =  2034          memr.asm:1046
+mrest      = $079F =  1951          memr.asm:1037
+mrntest    = $0903 =  2307          memr.asm:1082
+mstadr     = $077B =  1915          memr.asm:1032
+mtop       = $0678 =  1656          memr.asm:1011
+mtrap      = $0550 =  1360          memr.asm:782
+mwltest    = $08BA =  2234          memr.asm:1070
+mwrtest    = $08D4 =  2260          memr.asm:1074
+paddr      = $0610 =  1552          memr.asm:926
+pbadmem    = $0260 =   608          memr.asm:168
+pbin0      = $05DD =  1501          memr.asm:885
+pbin1      = $05DF =  1503          memr.asm:888
+pbin2      = $05E9 =  1513          memr.asm:896
+pbinary    = $05D5 =  1493          memr.asm:879
+pbm0       = $029F =   671          memr.asm:199
+pbyte      = $061F =  1567          memr.asm:942
+pbyted     = $061E =  1566          memr.asm:938
+pchar      = $0996 =  2454          memr.asm:1120
+pcrlf      = $0637 =  1591          memr.asm:963
+pdone      = $01A4 =   420          memr.asm:81
+pend       = $022C =   556          memr.asm:139
+pn0        = $0631 =  1585          memr.asm:958
+pnibble    = $0628 =  1576          memr.asm:952
+psp4       = $05FA =  1530          memr.asm:905
+pspace     = $0641 =  1601          memr.asm:969
+pspaces    = $05FC =  1532          memr.asm:908
+pstart     = $01FD =   509          memr.asm:117
+pstring    = $0604 =  1540          memr.asm:915
+pword      = $0616 =  1558          memr.asm:931
+rdmem      = $02BA =   698          memr.asm:227
+rdmem0     = $02C2 =   706          memr.asm:238
+rdmemhl    = $02BD =   701          memr.asm:231
+reset      = $09C1 =  2497          memr.asm:1154
+rnt0       = $0449 =  1097          memr.asm:568
+rnt1       = $045C =  1116          memr.asm:580
+rnt2       = $0465 =  1125          memr.asm:585
+rnt3       = $0479 =  1145          memr.asm:595
+rnt4       = $0489 =  1161          memr.asm:605
+rntest     = $0441 =  1089          memr.asm:553
+rst2       = $0010 =    16          memr.asm:16
+rst5       = $0028 =    40          memr.asm:17
+rst7       = $0038 =    56          memr.asm:18
+runall     = $01AD =   429          memr.asm:86
+saddr      = $00FC =   252          memr.asm:27
+setrst     = $055B =  1371          memr.asm:786
+setse      = $02A3 =   675          memr.asm:205
+stack      = $00F0 =   240          memr.asm:22
+start      = $0169 =   361          memr.asm:56
+sub16      = $0647 =  1607          memr.asm:976
+taddr      = $00F3 =   243          memr.asm:24
+tfirst     = $09DD =  2525          memr.asm:1174
+toupper    = $05B5 =  1461          memr.asm:856
+tpa        = $0100 =   256          memr.asm:14
+trap       = $0543 =  1347          memr.asm:772
+tstloop    = $0189 =   393          memr.asm:69
+wboot      = $0001 =     1          memr.asm:13
+wbt0       = $038F =   911          memr.asm:411
+wbt1       = $03A2 =   930          memr.asm:422
+wbt2       = $03AE =   942          memr.asm:431
+wbt3       = $03B2 =   946          memr.asm:435
+wbt4       = $03C2 =   962          memr.asm:447
+wbt5       = $03D3 =   979          memr.asm:460
+wbt6       = $03D7 =   983          memr.asm:464
+wbt7       = $03E7 =   999          memr.asm:476
+wbtest     = $0387 =   903          memr.asm:391
+wrmem      = $02AE =   686          memr.asm:214
+wrmem0     = $02B1 =   689          memr.asm:219
 
 
-total time: 0.0211 sec.
+total time: 0.0203 sec.
 no errors
