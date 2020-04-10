@@ -4,6 +4,10 @@
 ;
 ; Copyright (C) 1980 Lifeboat Associates
 ;
+; Reconstructed from memory image on April 9, 2020
+; by Patrick A Llinstruth (patrick@deltecent.com)
+;
+
 
 MONITOR	EQU	0000H
 WBOOT	EQU	0001H
